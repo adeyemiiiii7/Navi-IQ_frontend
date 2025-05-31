@@ -188,7 +188,7 @@ const CareerResultsPage = () => {
     // If the API returns recommendations directly
     if (apiData.recommendations && Array.isArray(apiData.recommendations)) {
       // Log the raw recommendations for debugging
-      console.log('Raw recommendations:', apiData.recommendations);
+    //   console.log('Raw recommendations:', apiData.recommendations);
       // Create a mapping of career titles to default details
       const careerDefaults = {
         'Construction Project Manager': {
