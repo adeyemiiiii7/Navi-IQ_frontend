@@ -1,1 +1,10 @@
 /* /index.html 200
+
+# Redirect all routes to index.html for client-side routing
+/login              /index.html   200
+/signup             /index.html   200
+/verify             /index.html   200
+/forgot-password    /index.html   200
+/reset-password     /index.html   200
+/assessment/*       /index.html   200
+/results           /index.html   200
