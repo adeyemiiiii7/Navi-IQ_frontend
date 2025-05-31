@@ -89,19 +89,25 @@ const CareerResultsPage = () => {
         headers.Authorization = `Bearer ${userInfo.token}`;
       }
   
+      // First check if we have a valid sessionId
+      if (!sessionId) {
+        throw new Error('No assessment session found');
+      }
+
       const response = await api.get(`/api/career/recommendations?sessionId=${sessionId}`, {
         headers
       });
       
-      // console.log('Raw API Response:', response.data);
+      // Check if the response is successful and has data
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch recommendations');
+      }
       
       // Transform the data to match expected format
       const transformedData = transformApiResponse(response.data);
       
-      // console.log('Transformed Data:', transformedData);
-      
-      if (!transformedData || !transformedData.recommendations) {
-        throw new Error('No valid recommendations found in response');
+      if (!transformedData || !transformedData.recommendations || transformedData.recommendations.length === 0) {
+        throw new Error('No recommendations found for this assessment');
       }
       
       setResultsData(transformedData);
@@ -109,18 +115,20 @@ const CareerResultsPage = () => {
     } catch (error) {
       console.error('Error fetching results:', error);
       
-      if (error.response?.status === 404) {
-        toast.error('Assessment results not found. Please retake the assessment.');
+      if (error.response?.status === 400) {
+        toast.error('No assessment responses found for this session. Please complete the assessment.');
+        navigate('/assessment');
       } else if (error.response?.status === 401) {
         toast.error('Authentication required. Please log in.');
         tokenUtils.clearAuthToken();
         navigate('/login');
-        return;
+      } else if (error.response?.status === 404) {
+        toast.error('Assessment results not found. Please retake the assessment.');
+        navigate('/assessment');
       } else {
         toast.error(error.message || 'Failed to load your results. Please try again.');
+        navigate('/assessment');
       }
-      
-      navigate('/assessment');
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +181,7 @@ const CareerResultsPage = () => {
 
   const transformApiResponse = (apiData) => {
     // Handle case where apiData might be null or undefined
-    if (!apiData) {
+    if (!apiData || !apiData.success) {
       return null;
     }
 
