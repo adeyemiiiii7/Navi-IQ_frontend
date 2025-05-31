@@ -178,44 +178,71 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
   };
 
   const handleResponseChange = (questionId, value, isMultiSelect = false) => {
+    // Clear error for this question when user changes response
+    if (errors[questionId]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[questionId];
+        return newErrors;
+      });
+    }
+
     if (isMultiSelect) {
+      // Handle multi-select (checkboxes)
       setResponses(prev => {
-        const currentValues = prev[questionId] || [];
-        const valueArray = Array.isArray(currentValues) ? currentValues : [];
-        
-        if (valueArray.includes(value)) {
-          // Remove if already selected
-          return {
-            ...prev,
-            [questionId]: valueArray.filter(v => v !== value)
-          };
+        const currentSelections = prev[questionId] || [];
+        let newSelections;
+
+        // Check if the option is an object with text property or a simple string
+        const compareValue = typeof value === 'object' && value !== null ? value.text : value;
+        const valueExists = currentSelections.some(item => 
+          typeof item === 'object' && item !== null ? 
+            item.text === compareValue : 
+            item === compareValue
+        );
+
+        if (valueExists) {
+          // If already selected, remove it
+          newSelections = currentSelections.filter(item => 
+            typeof item === 'object' && item !== null ?
+              item.text !== compareValue :
+              item !== compareValue
+          );
         } else {
-          // Add if not selected (check max selections)
-          const question = questions.find(q => q.id === questionId);
-          const maxSelections = question?.maxSelections || 99;
-          
-          if (valueArray.length < maxSelections) {
-            return {
-              ...prev,
-              [questionId]: [...valueArray, value]
-            };
-          }
-          return prev; // Don't add if max reached
+          // If not selected, add it
+          newSelections = [...currentSelections, value];
         }
+
+        // Update the responses
+        const updatedResponses = {
+          ...prev,
+          [questionId]: newSelections
+        };
+
+        // Save progress after a short delay
+        if (sessionId) {
+          clearTimeout(saveTimeout.current);
+          saveTimeout.current = setTimeout(() => saveProgress(false), 1500);
+        }
+
+        return updatedResponses;
       });
     } else {
-      setResponses(prev => ({
-        ...prev,
-        [questionId]: value
-      }));
-    }
-    
-    // Clear error for this question
-    if (errors[questionId]) {
-      setErrors(prev => ({
-        ...prev,
-        [questionId]: ''
-      }));
+      // Handle single-select (radio buttons) or text input
+      setResponses(prev => {
+        const updatedResponses = {
+          ...prev,
+          [questionId]: value
+        };
+
+        // Save progress after a short delay
+        if (sessionId) {
+          clearTimeout(saveTimeout.current);
+          saveTimeout.current = setTimeout(() => saveProgress(false), 1500);
+        }
+
+        return updatedResponses;
+      });
     }
   };
 
@@ -435,7 +462,13 @@ const handleSubmit = async () => {
           )}
           {Array.isArray(question.options) ? 
             question.options.map((option, index) => {
-              const isSelected = selectedValues.includes(option);
+              // Handle both string options and object options with text/traits properties
+              const optionValue = typeof option === 'object' && option !== null ? option.text : option;
+              const isSelected = selectedValues.some(selected => 
+                typeof selected === 'object' && selected !== null ? 
+                  selected.text === optionValue : 
+                  selected === optionValue
+              );
               const isDisabled = !isSelected && isMaxReached;
               
               return (
@@ -457,7 +490,7 @@ const handleSubmit = async () => {
                     className="w-4 h-4 text-blue-500 focus:ring-blue-500 focus:ring-2 disabled:opacity-50"
                   />
                   <span className={`ml-3 ${isDisabled ? 'text-slate-400' : 'text-slate-700'}`}>
-                    {option}
+                    {optionValue}
                   </span>
                 </label>
               );
@@ -474,28 +507,37 @@ const handleSubmit = async () => {
       // Single choice question - render radio buttons
       return (
         <div className="space-y-3">
-          {Array.isArray(question.options) ? question.options.map((option, index) => (
-            <label
-              key={index}
-              className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 hover:bg-blue-50/50 ${
-                responses[question.id] === option
-                  ? 'border-blue-500 bg-blue-50/50'
-                  : errors[question.id]
-                  ? 'border-red-300'
-                  : 'border-slate-300'
-              }`}
-            >
-              <input
-                type="radio"
-                name={`question-${question.id}`}
-                value={option}
-                checked={responses[question.id] === option}
-                onChange={(e) => handleResponseChange(question.id, e.target.value)}
-                className="w-4 h-4 text-blue-500 focus:ring-blue-500 focus:ring-2"
-              />
-              <span className="ml-3 text-slate-700">{option}</span>
-            </label>
-          )) : (
+          {Array.isArray(question.options) ? question.options.map((option, index) => {
+            // Handle both string options and object options with text/traits properties
+            const optionValue = typeof option === 'object' && option !== null ? option.text : option;
+            const currentResponse = responses[question.id];
+            const isSelected = typeof currentResponse === 'object' && currentResponse !== null ?
+              currentResponse.text === optionValue :
+              currentResponse === optionValue;
+            
+            return (
+              <label
+                key={index}
+                className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 hover:bg-blue-50/50 ${
+                  isSelected
+                    ? 'border-blue-500 bg-blue-50/50'
+                    : errors[question.id]
+                    ? 'border-red-300'
+                    : 'border-slate-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name={`question-${question.id}`}
+                  value={optionValue}
+                  checked={isSelected}
+                  onChange={() => handleResponseChange(question.id, option)}
+                  className="w-4 h-4 text-blue-500 focus:ring-blue-500 focus:ring-2"
+                />
+                <span className="ml-3 text-slate-700">{optionValue}</span>
+              </label>
+            );
+          }) : (
             <div className="p-4 text-amber-600 bg-amber-50 rounded-xl">
               <p>No options available for this question.</p>
             </div>
