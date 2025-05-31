@@ -194,20 +194,28 @@ const CareerResultsPage = () => {
               '$50,000 - $100,000';
           }
 
+          // Ensure all values are strings
+          const safeStringify = (value) => {
+            if (typeof value === 'object' && value !== null) {
+              return JSON.stringify(value);
+            }
+            return String(value || '');
+          };
+
           return {
             id: career.id || `career-${index}`,
-            title: career.title || career.name || career.role || 'Unknown Career',
-            description: career.description || `Career in ${career.sector || 'various industries'} focusing on ${career.title?.toLowerCase() || 'various'} roles.`,
-            matchScore: career.matchScore || 75 - (index * 5),
-            sector: career.sector || 'General',
-            averageSalary: formattedSalary || '$50,000 - $100,000',
+            title: safeStringify(career.title || career.name || career.role || 'Unknown Career'),
+            description: safeStringify(career.description || `Career in ${career.sector || 'various industries'} focusing on ${career.title?.toLowerCase() || 'various'} roles.`),
+            matchScore: Number(career.matchScore) || 75 - (index * 5),
+            sector: safeStringify(career.sector || 'General'),
+            averageSalary: safeStringify(formattedSalary || '$50,000 - $100,000'),
             salaryDetails: salaryDetails,
-            salaryRange: formattedSalary || '$50,000 - $100,000', // For UI display
-            growthOutlook: career.growthOutlook || 'Good',
-            location: career.location || 'Various locations',
-            experienceLevel: career.experienceLevel || career.level || 'All levels',
+            salaryRange: safeStringify(formattedSalary || '$50,000 - $100,000'),
+            growthOutlook: safeStringify(career.growthOutlook || 'Good'),
+            location: safeStringify(career.location || 'Various locations'),
+            experienceLevel: safeStringify(career.experienceLevel || career.level || 'All levels'),
             requiredSkills: ensureArray(career.requiredSkills).length > 0 ? ensureArray(career.requiredSkills) : ensureArray(career.skills).length > 0 ? ensureArray(career.skills) : generateSkills(career.title || career.name),
-            educationRequirements: career.educationRequirements || career.education || 'Bachelor\'s degree preferred',
+            educationRequirements: safeStringify(career.educationRequirements || career.education || 'Bachelor\'s degree preferred'),
             reasoning: ensureArray(career.reasoning).length > 0 ? ensureArray(career.reasoning) : 
                     ensureArray(career.matchReasons).length > 0 ? ensureArray(career.matchReasons) : 
                     ['Good match based on your assessment responses']
@@ -215,7 +223,7 @@ const CareerResultsPage = () => {
         }),
         strengths: ensureArray(apiData.strengths).length > 0 ? ensureArray(apiData.strengths) : ensureArray(apiData.topSkills).length > 0 ? ensureArray(apiData.topSkills) : ensureArray(apiData.skills).length > 0 ? ensureArray(apiData.skills) : ['Problem-solving', 'Analytical thinking'],
         developmentAreas: ensureArray(apiData.developmentAreas).length > 0 ? ensureArray(apiData.developmentAreas) : ['Communication', 'Time management'],
-        summary: apiData.summary || 'We found career options that match your profile'
+        summary: safeStringify(apiData.summary || 'We found career options that match your profile')
       };
     }
     
