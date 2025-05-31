@@ -84,8 +84,23 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
   const findLastAnsweredQuestionIndex = (responses, questions) => {
     for (let i = questions.length - 1; i >= 0; i--) {
       const response = responses[questions[i].id];
-      if (response && (Array.isArray(response) ? response.length > 0 : response.trim() !== '')) {
-        return i;
+      if (response) {
+        // Check if response is an array
+        if (Array.isArray(response)) {
+          if (response.length > 0) return i;
+        }
+        // Check if response is an object with text property
+        else if (typeof response === 'object' && response !== null) {
+          if (response.text) return i;
+        }
+        // Check if response is a non-empty string
+        else if (typeof response === 'string' && response.trim() !== '') {
+          return i;
+        }
+        // Any other truthy value
+        else if (response) {
+          return i;
+        }
       }
     }
     return -1;
@@ -240,6 +255,16 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
       }, 1500);
     }
   };
+  
+  const goToNextQuestion = () => {
+    if (validateCurrentQuestion()) {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        // Auto-save when moving to next question
+        saveProgress(false);
+      }
+    }
+  };
 
   const validateCurrentQuestion = () => {
     const currentQuestion = questions[currentQuestionIndex];
@@ -256,7 +281,25 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
         return false;
       }
     } else {
-      if (!response || response.trim() === '') {
+      // Check if response is valid based on its type
+      let isValid = false;
+      
+      if (response) {
+        // If response is an object with text property
+        if (typeof response === 'object' && response !== null) {
+          isValid = response.text ? true : false;
+        }
+        // If response is a string
+        else if (typeof response === 'string') {
+          isValid = response.trim() !== '';
+        }
+        // Any other truthy value
+        else {
+          isValid = true;
+        }
+      }
+      
+      if (!isValid) {
         setErrors(prev => ({
           ...prev,
           [currentQuestion.id]: 'This question is required'
@@ -265,16 +308,6 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
       }
     }
     return true;
-  };
-
-  const goToNextQuestion = () => {
-    if (validateCurrentQuestion()) {
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
-        // Auto-save when moving to next question
-        saveProgress(false);
-      }
-    }
   };
 
   const goToPreviousQuestion = () => {
@@ -296,7 +329,25 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
           isValid = false;
         }
       } else {
-        if (!response || response.trim() === '') {
+        // Check if response is valid based on its type
+        let responseValid = false;
+        
+        if (response) {
+          // If response is an object with text property
+          if (typeof response === 'object' && response !== null) {
+            responseValid = response.text ? true : false;
+          }
+          // If response is a string
+          else if (typeof response === 'string') {
+            responseValid = response.trim() !== '';
+          }
+          // Any other truthy value
+          else {
+            responseValid = true;
+          }
+        }
+        
+        if (!responseValid) {
           newErrors[question.id] = 'This question is required';
           isValid = false;
         }
