@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Brain, User, ArrowRight, ArrowLeft, CheckCircle, Clock, Save, Lightbulb, AlertCircle, RotateCcw, X,Target } from 'lucide-react';
 import { useAuth } from '../utils/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -18,6 +18,7 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
   const [progress, setProgress] = useState(null);
   const [hasResumedProgress, setHasResumedProgress] = useState(false);
   const [notification, setNotification] = useState(null);
+  // No longer using saveTimeout ref
 
   // Get user initials for profile
   const getUserInitials = () => {
@@ -214,35 +215,29 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
         }
 
         // Update the responses
-        const updatedResponses = {
+        return {
           ...prev,
           [questionId]: newSelections
         };
-
-        // Save progress after a short delay
-        if (sessionId) {
-          clearTimeout(saveTimeout.current);
-          saveTimeout.current = setTimeout(() => saveProgress(false), 1500);
-        }
-
-        return updatedResponses;
       });
     } else {
       // Handle single-select (radio buttons) or text input
-      setResponses(prev => {
-        const updatedResponses = {
-          ...prev,
-          [questionId]: value
-        };
-
-        // Save progress after a short delay
-        if (sessionId) {
-          clearTimeout(saveTimeout.current);
-          saveTimeout.current = setTimeout(() => saveProgress(false), 1500);
+      setResponses(prev => ({
+        ...prev,
+        [questionId]: value
+      }));
+    }
+    
+    // Save progress after response change (outside of the state updates)
+    if (sessionId) {
+      // Use a simple timeout without ref
+      setTimeout(() => {
+        try {
+          saveProgress(false);
+        } catch (err) {
+          console.error('Error auto-saving progress:', err);
         }
-
-        return updatedResponses;
-      });
+      }, 1500);
     }
   };
 
