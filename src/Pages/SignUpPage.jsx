@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { safeTrim } from '../utils/stringUtils';
 import { ArrowRight, Brain, Eye, EyeOff, Mail, Lock, ArrowLeft, User, CheckCircle, XCircle } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
@@ -100,11 +101,11 @@ const SignupPage = () => {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.firstName.trim()) {
+    if (!safeTrim(formData.firstName)) {
       newErrors.firstName = 'First name is required';
     }
     
-    if (!formData.lastName.trim()) {
+    if (!safeTrim(formData.lastName)) {
       newErrors.lastName = 'Last name is required';
     }
     

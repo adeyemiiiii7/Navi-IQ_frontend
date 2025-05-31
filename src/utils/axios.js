@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { safeTrim } from './stringUtils';
 import toast from 'react-hot-toast';
 
 const api = axios.create({
@@ -78,7 +79,7 @@ export const authAPI = {
       const response = await api.post('/api/auth/signup', {
         firstName: userData.firstName,
         lastName: userData.lastName,
-        email: userData.email.trim().toLowerCase(),
+        email: safeTrim(userData.email).toLowerCase(),
         password: userData.password,
       });
       return response.data;
@@ -92,7 +93,7 @@ export const authAPI = {
   verifyEmail: async (email, code) => {
     try {
       const response = await api.post('/api/auth/verify-email', {
-        email: email.trim().toLowerCase(),
+        email: safeTrim(email).toLowerCase(),
         code: code.toString(),
       });
       return response.data;
@@ -106,7 +107,7 @@ export const authAPI = {
   resendVerificationCode: async (email) => {
     try {
       const response = await api.post('/api/auth/resend-verification', {
-        email: email.trim().toLowerCase(),
+        email: safeTrim(email).toLowerCase(),
       });
       return response.data;
     } catch (error) {
@@ -119,7 +120,7 @@ export const authAPI = {
   signin: async (email, password) => {
     try {
       const response = await api.post('/api/auth/login', {
-        email: email.trim().toLowerCase(),
+        email: safeTrim(email).toLowerCase(),
         password,
       });
       return response.data;
@@ -144,7 +145,7 @@ export const authAPI = {
   forgotPassword: async (email) => {
     try {
       const response = await api.post('/api/auth/forgot-password', {
-        email: email.trim().toLowerCase()
+        email: safeTrim(email).toLowerCase()
       });
       return response.data;
     } catch (error) {

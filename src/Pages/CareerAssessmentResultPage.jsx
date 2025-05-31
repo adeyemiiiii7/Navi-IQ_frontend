@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { safeTrim } from '../utils/stringUtils';
 import { 
   Trophy, 
   TrendingUp, 
@@ -42,7 +43,7 @@ const ensureArray = (value) => {
       return Array.isArray(parsed) ? parsed : [value];
     } catch (e) {
       // If parsing fails, split by comma (common format)
-      return value.split(',').map(item => item.trim());
+      return value.split(',').map(item => safeTrim(item));
     }
   }
   

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Brain, ArrowRight, ArrowLeft, CheckCircle, Clock, Save, Lightbulb, AlertCircle, X, Target } from 'lucide-react';
 import api from '../utils/axios';
 import { useAuth } from '../utils/AuthContext';
+import { safeTrim, safeArrayTrim } from '../utils/stringUtils';
 
 const ObjectiveQuestionsForm = () => {
   const location = useLocation();
@@ -53,7 +54,7 @@ const ObjectiveQuestionsForm = () => {
             q.options = JSON.parse(q.options);
           } catch (e) {
             // If parsing fails, split by comma (common format)
-            q.options = q.options.split(',').map(opt => opt.trim());
+            q.options = q.options.split(',').map(opt => safeTrim(opt));
           }
         }
         return q;
@@ -99,7 +100,7 @@ const ObjectiveQuestionsForm = () => {
     
     const response = responses[currentQuestion.id];
     
-    if (!response || response.trim() === '') {
+    if (!response || safeTrim(response) === '') {
       setErrors(prev => ({
         ...prev,
         [currentQuestion.id]: 'This question is required'
@@ -163,7 +164,7 @@ const ObjectiveQuestionsForm = () => {
 
   const getProgressPercentage = () => {
     const answeredCount = Object.values(responses).filter(response => {
-      return response && response.trim() !== '';
+      return response && safeTrim(response) !== '';
     }).length;
     
     return questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;

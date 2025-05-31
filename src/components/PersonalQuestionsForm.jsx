@@ -3,6 +3,7 @@ import { Brain, User, ArrowRight, ArrowLeft, CheckCircle, Clock, Save, Lightbulb
 import { useAuth } from '../utils/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../utils/axios';
+import { safeTrim, safeArrayTrim } from '../utils/stringUtils';
 
 const PersonalQuestionsForm = ({ onComplete, onBack }) => {
   const { userInfo } = useAuth();
@@ -94,7 +95,7 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
           if (response.text) return i;
         }
         // Check if response is a non-empty string
-        else if (typeof response === 'string' && response.trim() !== '') {
+        else if (typeof response === 'string' && safeTrim(response) !== '') {
           return i;
         }
         // Any other truthy value
@@ -119,7 +120,7 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
             q.options = JSON.parse(q.options);
           } catch (e) {
             // If parsing fails, split by comma (common format)
-            q.options = q.options.split(',').map(opt => opt.trim());
+            q.options = q.options.split(',').map(opt => safeTrim(opt));
           }
         }
         return q;
@@ -291,7 +292,7 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
         }
         // If response is a string
         else if (typeof response === 'string') {
-          isValid = response.trim() !== '';
+          isValid = safeTrim(response) !== '';
         }
         // Any other truthy value
         else {
@@ -339,7 +340,7 @@ const PersonalQuestionsForm = ({ onComplete, onBack }) => {
           }
           // If response is a string
           else if (typeof response === 'string') {
-            responseValid = response.trim() !== '';
+            responseValid = safeTrim(response) !== '';
           }
           // Any other truthy value
           else {
@@ -446,7 +447,7 @@ const handleSubmit = async () => {
       if (Array.isArray(response)) {
         return response.length > 0;
       }
-      return response && response.trim() !== '';
+      return response && safeTrim(response) !== '';
     }).length;
     
     // Return 0 if no questions answered yet
@@ -458,7 +459,7 @@ const handleSubmit = async () => {
       if (Array.isArray(response)) {
         return response.length > 0;
       }
-      return response && response.trim() !== '';
+      return response && safeTrim(response) !== '';
     }).length;
   };
   
