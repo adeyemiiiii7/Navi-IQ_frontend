@@ -135,10 +135,24 @@ const ObjectiveQuestionsForm = () => {
 
     setIsSubmitting(true);
     try {
-      const formattedResponses = questions.map(question => ({
-        questionId: question.id,
-        answer: responses[question.id]
-      }));
+      const formattedResponses = questions.map(question => {
+        // Ensure answer is a string
+        let answer = responses[question.id];
+        if (answer === null || answer === undefined) {
+          answer = '';
+        } else if (typeof answer === 'object') {
+          // Convert arrays or objects to string
+          answer = JSON.stringify(answer);
+        } else {
+          // Ensure it's a string
+          answer = String(answer);
+        }
+        
+        return {
+          questionId: question.id,
+          answer: answer
+        };
+      });
 
       const response = await api.post('/api/questions/objective', {
         responses: formattedResponses,
