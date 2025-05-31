@@ -30,4 +30,20 @@ const safeArrayTrim = (array) => {
   );
 };
 
-export { safeTrim, safeArrayTrim };
+/**
+ * Safely converts a value to a JSON string
+ * @param {any} value - The value to stringify
+ * @returns {string} - The stringified value or empty string if there's an error
+ */
+const safeStringify = (value) => {
+  try {
+    if (value === undefined || value === null) return '';
+    if (typeof value === 'string') return value;
+    return JSON.stringify(value);
+  } catch (error) {
+    console.error('Error in safeStringify:', error);
+    return '';
+  }
+};
+
+export { safeTrim, safeArrayTrim, safeStringify };
