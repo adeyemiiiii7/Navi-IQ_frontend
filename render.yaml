@@ -3,9 +3,10 @@ services:
     name: navi-iq-frontend
     buildCommand: ./render-build.sh
     staticPublishPath: ./dist
+    # Improved SPA routing configuration
     routes:
       - type: rewrite
-        source: /*
+        source: /**
         destination: /index.html
     headers:
       - path: /*
