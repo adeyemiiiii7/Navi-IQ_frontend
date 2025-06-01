@@ -29,9 +29,24 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
+    // Increase the chunk size warning limit to avoid warnings
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        // Configure manual chunks to better split the code
+        manualChunks: (id) => {
+          // Put react and react-dom in a separate vendor chunk
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          // Put other major dependencies in their own chunks
+          if (id.includes('node_modules/')) {
+            // Extract the package name from the path
+            const packageName = id.toString().split('node_modules/')[1].split('/')[0];
+            // Group smaller packages together
+            return `vendor-${packageName}`;
+          }
+        }
       }
     }
   },
