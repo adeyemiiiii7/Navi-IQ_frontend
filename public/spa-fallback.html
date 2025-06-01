@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navi-IQ</title>
+  <script>
+    // Capture the current URL path
+    const currentPath = window.location.pathname;
+    
+    // Store it in sessionStorage
+    sessionStorage.setItem('redirectPath', currentPath);
+    
+    // Redirect to the root
+    window.location.href = '/';
+  </script>
+</head>
+<body>
+  <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+    <div style="text-align: center;">
+      <h2>Redirecting...</h2>
+      <p>Please wait while we redirect you to the requested page.</p>
+    </div>
+  </div>
+</body>
+</html>
