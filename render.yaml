@@ -1,29 +1,9 @@
 services:
   - type: web
     name: navi-iq-frontend
-    buildCommand: ./render-build.sh
+    buildCommand: npm run build
     staticPublishPath: ./dist
-    # Comprehensive SPA routing configuration
     routes:
-      # Serve static assets directly
-      - type: rewrite
-        source: /assets/*
-        destination: /assets/*
-      # Serve static files in the root directly
-      - type: rewrite
-        source: /favicon.ico
-        destination: /favicon.ico
-      - type: rewrite
-        source: /robots.txt
-        destination: /robots.txt
-      # Handle all other routes with index.html for SPA
       - type: rewrite
         source: /*
         destination: /index.html
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache
-      - path: /*
-        name: X-Frame-Options
-        value: DENY

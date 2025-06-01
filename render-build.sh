@@ -36,6 +36,12 @@ for file in _redirects _headers staticwebapp.config.json; do
   fi
 done
 
+# Copy Render-specific configuration
+if [ -f "render.json" ]; then
+  echo "Copying render.json to dist..."
+  cp render.json dist/
+fi
+
 # Create a simple .htaccess file for additional server configuration
 cat > dist/.htaccess << EOL
 # Enable rewrite engine

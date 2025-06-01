@@ -1,11 +1,2 @@
 # Redirect all routes to index.html with a 200 status code
-/* /index.html 200
-
-# Explicitly handle common routes
-/signup /index.html 200
-/login /index.html 200
-/assessment/* /index.html 200
-/results /index.html 200
-/verify /index.html 200
-/forgot-password /index.html 200
-/reset-password /index.html 200
+/*    /index.html   200
