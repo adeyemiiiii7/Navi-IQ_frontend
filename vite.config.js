@@ -2,15 +2,42 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
+import fs from 'fs'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    {
+      name: 'copy-200-html',
+      closeBundle() {
+        // Copy index.html to 200.html in the dist folder after build
+        const indexPath = resolve(__dirname, 'dist', 'index.html')
+        const targetPath = resolve(__dirname, 'dist', '200.html')
+        
+        if (fs.existsSync(indexPath)) {
+          try {
+            fs.copyFileSync(indexPath, targetPath)
+            console.log('Successfully copied index.html to 200.html for SPA routing')
+          } catch (err) {
+            console.error('Error copying 200.html:', err)
+          }
+        }
+      }
+    }
+  ],
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   },
   server: {
     port: 5173,
+    historyApiFallback: true
   },
   resolve: {
     alias: {

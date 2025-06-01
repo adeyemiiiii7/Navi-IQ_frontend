@@ -3,14 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="refresh" content="0;url=/" />
   <title>Navi-IQ</title>
-</head>
-<body>
   <script>
     // This file is a fallback for direct URL access in SPA
-    // It redirects all routes to the index.html
-    window.location.href = "/";
+    // Store the current path in sessionStorage before redirecting
+    const path = window.location.pathname;
+    sessionStorage.setItem('redirectPath', path);
+    
+    // Redirect to the root
+    window.location.href = window.location.origin;
   </script>
+</head>
+<body>
+  <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+    <div style="text-align: center;">
+      <h2>Redirecting...</h2>
+      <p>Please wait while we redirect you to the correct page.</p>
+    </div>
+  </div>
 </body>
 </html>

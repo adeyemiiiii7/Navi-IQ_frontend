@@ -1,10 +1,16 @@
 services:
   - type: web
     name: navi-iq-frontend
-    env: static
-    buildCommand: npm run build
+    buildCommand: ./render-build.sh
     staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+      - path: /*
+        name: X-Frame-Options
+        value: DENY

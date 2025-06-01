@@ -5,6 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/assets/navi-iq-logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Navi-IQ</title>
+    <script>
+      // Check if we have a redirect path stored in sessionStorage
+      window.onload = function() {
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        if (redirectPath && redirectPath !== '/' && window.location.pathname === '/') {
+          // Clear the stored path
+          sessionStorage.removeItem('redirectPath');
+          // Use history API to navigate without a full page reload
+          window.history.pushState(null, null, redirectPath);
+        }
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>
