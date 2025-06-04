@@ -53,10 +53,24 @@ const ObjectiveQuestionsForm = () => {
           try {
             q.options = JSON.parse(q.options);
           } catch (e) {
-            // If parsing fails, split by comma (common format)
-            q.options = q.options.split(',').map(opt => safeTrim(opt));
+            console.error('Error parsing options:', e);
+            q.options = [];
           }
         }
+        
+        // Ensure options is an array
+        if (!Array.isArray(q.options)) {
+          q.options = [];
+        }
+        
+        // Process each option to ensure it's a string
+        q.options = q.options.map(opt => {
+          if (typeof opt === 'object' && opt !== null) {
+            return opt.text || JSON.stringify(opt);
+          }
+          return String(opt);
+        });
+        
         return q;
       });
       
@@ -70,7 +84,6 @@ const ObjectiveQuestionsForm = () => {
       setResponses(initialResponses);
     } catch (error) {
       console.error('Error fetching objective questions:', error);
-      // Show error in the UI status area
       setProgress({
         error: true,
         message: 'Failed to load questions. Please try again.'
@@ -81,9 +94,29 @@ const ObjectiveQuestionsForm = () => {
   };
 
   const handleResponseChange = (questionId, value) => {
+    const currentQuestion = questions.find(q => q.id === questionId);
+    if (!currentQuestion) return;
+
+    let formattedValue = value;
+    
+    // If the question has options with traits, format the response accordingly
+    if (currentQuestion.options && currentQuestion.options.some(opt => typeof opt === 'object' && opt.traits)) {
+      const selectedOption = currentQuestion.options.find(opt => 
+        (typeof opt === 'object' && opt.text === value) || opt === value
+      );
+      
+      if (selectedOption) {
+        formattedValue = {
+          text: typeof selectedOption === 'object' ? selectedOption.text : selectedOption,
+          traits: selectedOption.traits || [],
+          score: selectedOption.score || 3
+        };
+      }
+    }
+
     setResponses(prev => ({
       ...prev,
-      [questionId]: value
+      [questionId]: formattedValue
     }));
     
     if (errors[questionId]) {
@@ -206,28 +239,37 @@ const ObjectiveQuestionsForm = () => {
   const renderInputField = (question) => {
     return (
       <div className="space-y-3">
-        {question.options.map((option, index) => (
-          <label
-            key={index}
-            className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 hover:bg-blue-50/50 ${
-              responses[question.id] === option
-                ? 'border-blue-500 bg-blue-50/50'
-                : errors[question.id]
-                ? 'border-red-300'
-                : 'border-slate-300'
-            }`}
-          >
-            <input
-              type="radio"
-              name={`question-${question.id}`}
-              value={option}
-              checked={responses[question.id] === option}
-              onChange={(e) => handleResponseChange(question.id, e.target.value)}
-              className="w-4 h-4 text-blue-500 focus:ring-blue-500 focus:ring-2"
-            />
-            <span className="ml-3 text-slate-700">{option}</span>
-          </label>
-        ))}
+        {question.options.map((option, index) => {
+          const optionText = typeof option === 'object' ? option.text : option;
+          const optionValue = typeof option === 'object' ? option.text : option;
+          
+          return (
+            <label
+              key={index}
+              className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 hover:bg-blue-50/50 ${
+                (typeof responses[question.id] === 'object' && responses[question.id]?.text === optionValue) ||
+                responses[question.id] === optionValue
+                  ? 'border-blue-500 bg-blue-50/50'
+                  : errors[question.id]
+                  ? 'border-red-300'
+                  : 'border-slate-300'
+              }`}
+            >
+              <input
+                type="radio"
+                name={`question-${question.id}`}
+                value={optionValue}
+                checked={
+                  (typeof responses[question.id] === 'object' && responses[question.id]?.text === optionValue) ||
+                  responses[question.id] === optionValue
+                }
+                onChange={(e) => handleResponseChange(question.id, e.target.value)}
+                className="w-4 h-4 text-blue-500 focus:ring-blue-500 focus:ring-2"
+              />
+              <span className="ml-3 text-slate-700">{optionText}</span>
+            </label>
+          );
+        })}
       </div>
     );
   };
