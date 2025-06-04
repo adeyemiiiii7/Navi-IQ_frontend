@@ -214,8 +214,14 @@ const ObjectiveQuestionsForm = () => {
       return response && safeTrim(response) !== '';
     }).length;
     
-    return questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
+    const percentage = questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
+    setProgressPercentage(percentage);
+    return percentage;
   };
+
+  useEffect(() => {
+    getProgressPercentage();
+  }, [responses, questions.length]);
 
   const showNotification = (type, message) => {
     setNotification({
@@ -352,12 +358,12 @@ const ObjectiveQuestionsForm = () => {
         <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center justify-between mb-1 sm:mb-2">
             <span className="text-xs sm:text-sm font-medium text-slate-700">Dynamic Assessment Progress</span>
-            <span className="text-xs sm:text-sm font-medium text-blue-600">{getProgressPercentage()}%</span>
+            <span className="text-xs sm:text-sm font-medium text-blue-600">{progressPercentage}%</span>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-1.5 sm:h-2">
             <div
               className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 sm:h-2 rounded-full transition-all duration-300"
-              style={{ width: `${getProgressPercentage()}%` }}
+              style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
         </div>
